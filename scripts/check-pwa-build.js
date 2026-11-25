@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+const worker=readFileSync('dist/sw.js','utf8');
+const assets=JSON.parse(worker.match(/const ASSETS = (\[.*?\])/)[1]);
+assert.ok(assets.includes('index.html'),'Offline navigation must precache index.html');
+for(const name of assets) assert.ok(existsSync('dist/'+name),`Missing resource: ${name}`);
+const html=readFileSync('dist/index.html','utf8');
+for(const [,name] of html.matchAll(/(?:src|href)="\.\/(.*?)"/g)) assert.ok(assets.includes(name),`Uncached page resource: ${name}`);
+assert.ok(!worker.includes('__VERSION__')&&!worker.includes('__ASSETS__'));
+console.log(`PWA build verified: ${assets.length} offline resources, including the entry page.`);

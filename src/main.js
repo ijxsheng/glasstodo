@@ -120,7 +120,8 @@ function errorText(error) {
 function updateControls() {
   document.querySelectorAll('[data-write]').forEach(button => { button.disabled = !ready || busy; });
   $('#retry-load').disabled = busy;
-  $('#data-status').textContent = !ready ? t('本地数据库尚未就绪') : busy ? t('正在保存…') : t('已保存到当前浏览器');
+  $('#data-status').textContent = !ready ? t('本地数据库尚未就绪') : busy ? t('正在保存…') : '';
+  $('#data-status').hidden = ready && !busy;
 }
 function formatDate(value) {
   return new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(new Date(ui`${value}T12:00:00`));
@@ -149,7 +150,7 @@ function render() {
   const counts = taskCounts(tasks, date, now);
   const progress = todayProgress(tasks, date);
   $('#date-line').textContent = new Intl.DateTimeFormat(locale,{month:'long',day:'numeric',weekday:'long'}).format(now);
-  $('#today-progress').innerHTML = ui`<div class="progress-heading"><span>今日进度</span><strong>${progress.percent}%</strong></div><div class="progress-track" role="progressbar" aria-label="今日完成率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><span style="width:${progress.percent}%"></span></div><p><b>${progress.completed}</b> / ${progress.total} 项已完成<span>${language === 'en' ? taskCount(progress.remaining) + ' left' : ui`还有 ${progress.remaining} 项待办`}</span></p>`;
+  $('#today-progress').innerHTML = ui`<div class="progress-heading"><span>今日进度</span><strong>${progress.percent}%</strong></div><div class="progress-track" role="progressbar" aria-label="今日完成率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}"><span style="width:${progress.percent}%"></span></div><p><b>${progress.completed}</b> / ${progress.total} 项已完成</p>`;
   document.querySelectorAll('[data-tab]').forEach(button => {
     button.classList.toggle('active', state.tab === button.dataset.tab);
     button.setAttribute('aria-pressed', String(state.tab === button.dataset.tab));

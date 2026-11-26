@@ -17,6 +17,7 @@ import { categories as defaultCategories, priorities, localDate, inTab, taskCoun
 import { getSnapshot, addCategory, saveTask, setStatus, appendProgress, updateProgress, getAttachmentData, deleteTask, restoreTask } from './modules/storage.js';
 
 const icons = {
+  bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   settings: '<path d="m9 4 1-2h4l1 2 2 1 2-.2 2 3-1 2v3l1 2-2 3-2-.2-2 1-1 2h-4l-1-2-2-1-2 .2-2-3 1-2v-3l-1-2 2-3 2 .2Z"/><circle cx="12" cy="11.5" r="3"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
@@ -38,7 +39,7 @@ let opacity = 90;
 try { const stored = Number(localStorage.getItem('glasstodo.ui.opacity')); if (stored >= 40 && stored <= 100) opacity = stored; } catch { /* 存储不可用时仍支持当前会话预览。 */ }
 document.querySelector('#app').innerHTML = ui`
   <div class="workspace">
-    <header class="app-header"><a class="brand" href="./" aria-label="GlassTodo 首页"><span class="brand-mark">${icon('check')}</span>GlassTodo</a><button class="text-button" id="open-reminders">提醒中心 <span id="reminder-badge" class="reminder-badge" hidden><span>${language === 'zh' ? '错过' : 'Missed'}</span><strong id="reminder-count">0</strong></span></button><div class="language-switch" id="language-switch" role="group" aria-label="${language === 'en' ? 'Interface language' : '界面语言'}"><button type="button" data-language="en" aria-label="English" aria-pressed="${language === 'en'}">EN</button><button type="button" data-language="zh" aria-label="简体中文" aria-pressed="${language === 'zh'}">中</button></div><button class="icon-button" id="open-settings" aria-label="打开设置" title="设置">${icon('settings')}</button></header>
+    <header class="app-header"><a class="brand" href="./" aria-label="GlassTodo 首页"><span class="brand-mark">${icon('check')}</span>GlassTodo</a><button class="icon-button" id="open-reminders" aria-label="提醒中心" title="提醒中心">${icon('bell')}<span id="reminder-badge" class="reminder-badge" aria-hidden="true" hidden><span id="reminder-count">0</span></span></button><div class="language-switch" id="language-switch" role="group" aria-label="${language === 'en' ? 'Interface language' : '界面语言'}"><button type="button" data-language="en" aria-label="English" aria-pressed="${language === 'en'}">EN</button><button type="button" data-language="zh" aria-label="简体中文" aria-pressed="${language === 'zh'}">中</button></div><button class="icon-button" id="open-settings" aria-label="打开设置" title="设置">${icon('settings')}</button></header>
     <div class="app-notice" id="app-notice" role="status" hidden><span id="notice-text"></span><button class="text-button" id="retry-load" hidden>重试读取</button></div><div class="app-layout">
       <aside class="day-panel glass" aria-label="今日概览">
         <h1>今日概览</h1><p class="date-line" id="date-line"></p>
@@ -596,7 +597,8 @@ async function refreshReminders() {
   reminderEvents = snapshot.events;
   $('#reminder-count').textContent = reminderEvents.length;
   $('#reminder-badge').hidden = reminderEvents.length === 0;
-  $('#reminder-badge').title = language === 'zh' ? `${reminderEvents.length} 条错过的提醒，点击查看或延迟` : `${reminderEvents.length} missed reminders. Open to review or snooze.`;
+  $('#open-reminders').setAttribute('aria-label', language === 'zh' ? `提醒中心，${reminderEvents.length} 条错过的提醒` : `Reminder center, ${reminderEvents.length} missed reminders`);
+  $('#reminder-count').style.fontSize = reminderEvents.length > 999 ? '8px' : reminderEvents.length > 99 ? '10px' : '12px';
   $('#reminders-list').innerHTML = reminderEvents.map(event => '<article class="reminder-entry"><strong>' + html(event.title) + t('</strong><p class="helper">原定 ') + html(formatTimestamp(event.scheduledAt)) + '</p><div class="reminder-actions">' + (event.kind === 'task' ? '<button class="text-button" data-reminder-task="' + html(event.taskId) + '">' + (event.subtaskId ? t('查看子任务') : t('查看任务')) + '</button>' + [5,10,30].map(minutes => '<button class="text-button" data-snooze="' + html(event.id) + '" data-minutes="' + minutes + t('">延迟 ') + minutes + t(' 分钟</button>')).join('') : '') + '<button class="text-button" data-dismiss-reminder="' + html(event.id) + t('">忽略</button></div></article>')).join('') || t('<p class="helper">暂无待处理提醒。</p>');
   renderNotificationPermission();
 }

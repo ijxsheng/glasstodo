@@ -599,7 +599,7 @@ async function refreshReminders() {
   $('#reminder-badge').hidden = reminderEvents.length === 0;
   $('#open-reminders').setAttribute('aria-label', language === 'zh' ? `提醒中心，${reminderEvents.length} 条错过的提醒` : `Reminder center, ${reminderEvents.length} missed reminders`);
   $('#reminder-count').style.fontSize = reminderEvents.length > 999 ? '8px' : reminderEvents.length > 99 ? '10px' : '12px';
-  $('#reminders-list').innerHTML = reminderEvents.map(event => '<article class="reminder-entry"><strong>' + html(event.title) + t('</strong><p class="helper">原定 ') + html(formatTimestamp(event.scheduledAt)) + '</p><div class="reminder-actions">' + (event.kind === 'task' ? '<button class="text-button" data-reminder-task="' + html(event.taskId) + '">' + (event.subtaskId ? t('查看子任务') : t('查看任务')) + '</button>' : '') + '<button class="text-button" data-dismiss-reminder="' + html(event.id) + t('">忽略</button></div></article>')).join('') || t('<p class="helper">暂无待处理提醒。</p>');
+  $('#reminders-list').innerHTML = reminderEvents.map(event => '<article class="reminder-entry"><strong>' + html(event.title) + t('</strong><p class="helper">原定 ') + html(formatTimestamp(event.scheduledAt)) + '</p><div class="reminder-actions">' + (event.kind === 'task' ? '<button class="text-button" data-reminder-task="' + html(event.taskId) + '" data-reminder-event="' + html(event.id) + '">' + (event.subtaskId ? t('查看子任务') : t('查看任务')) + '</button>' : '') + '<button class="text-button" data-dismiss-reminder="' + html(event.id) + t('">忽略</button></div></article>')).join('') || t('<p class="helper">暂无待处理提醒。</p>');
   renderNotificationPermission();
 }
 async function checkReminders() {
@@ -611,8 +611,19 @@ async function checkReminders() {
       channel?.postMessage('reminders');
       const summary = events.length === 1 ? events[0].title : events.length + t(' 项提醒待处理');
       notify(t('提醒：') + summary + t('。可在顶部提醒中心查看。'));
-      const result = sendReminderNotifications(events, () => {
-        refreshReminders().then(() => { if (!document.querySelector('dialog[open]')) $('#reminders-dialog').showModal(); }).catch(() => notify(t('请在顶部提醒中心查看。')));
+      const result = sendReminderNotifications(events, async clickedEvents => {
+        try {
+          if (clickedEvents.length === 1) {
+            await dismissReminder(clickedEvents[0].id);
+            channel?.postMessage('reminders');
+            await refreshReminders();
+            await reloadTasks();
+            if (!document.querySelector('dialog[open]')) openDetail(clickedEvents[0].taskId);
+          } else {
+            await refreshReminders();
+            if (!document.querySelector('dialog[open]')) $('#reminders-dialog').showModal();
+          }
+        } catch (error) { notify(t('提醒检查失败：') + errorText(error)); }
       });
       if (result.requested < result.total) notify(t('提醒：') + summary + t('。系统通知未能全部发出，已保留在顶部提醒中心。'));
     }
@@ -636,7 +647,7 @@ $('#open-reminders').addEventListener('click', async () => {
 $('#reminders-list').addEventListener('click', async event => {
   const open = event.target.closest('[data-reminder-task]');
   if (open) {
-    try { await reloadTasks(); $('#reminders-dialog').close(); openDetail(open.dataset.reminderTask); }
+    try { await reloadTasks(); await dismissReminder(open.dataset.reminderEvent); await refreshReminders(); channel?.postMessage('reminders'); $('#reminders-dialog').close(); openDetail(open.dataset.reminderTask); }
     catch (error) { $('#reminders-error').textContent = errorText(error); }
     return;
   }

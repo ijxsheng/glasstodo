@@ -14,6 +14,28 @@ const now=new Date('2026-11-25T12:00:00');
 const stamp=now.toISOString();
 const fields={status:'todo',reminderEnabled:true,reminderDate:'2026-11-25',reminderTime:'12:00',reminderVersion:1};
 
+test('点击通知只回传该通知对应的提醒，显示或关闭通知不自动标记已读', () => {
+  const sent=[], viewed=[];
+  class FakeNotification {
+    static permission='granted';
+    constructor(){sent.push(this);}
+    close(){}
+  }
+  const events=[{id:'parent@1',title:'父任务',scheduledAt:stamp},
+    {id:'parent/sub/child@1',title:'子任务',scheduledAt:stamp},
+    {id:'old-a@1',title:'错过A',scheduledAt:new Date(now-600000).toISOString()},
+    {id:'old-b@1',title:'错过B',scheduledAt:new Date(now-600000).toISOString()}];
+  sendReminderNotifications(events,items=>viewed.push(items.map(item=>item.id)),FakeNotification,now);
+  assert.equal(sent.length,3);
+  assert.deepEqual(viewed,[]);
+  sent[0].close();
+  assert.deepEqual(viewed,[]);
+  sent[1].onclick();
+  assert.deepEqual(viewed,[['parent/sub/child@1']]);
+  sent[2].onclick();
+  assert.deepEqual(viewed[1],['old-a@1','old-b@1']);
+});
+
 test('同一分钟的父任务、子任务和另一项任务分别请求通知，标记互不覆盖', () => {
   const tasks=[{...fields,id:'parent',title:'父任务',subtasks:[{...fields,id:'child',title:'子任务'}]},{...fields,id:'other',title:'另一项任务'}];
   const plan=planTaskReminders(tasks,now);

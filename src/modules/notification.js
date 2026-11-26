@@ -64,10 +64,10 @@ export function notificationMessages(events, now = new Date()) {
   for (const event of events) {
     (now.getTime() - new Date(event.scheduledAt).getTime() <= 120000 ? recent : missed).push(event);
   }
-  const messages = recent.map(event => ({ title: t('GlassTodo 提醒'), body: event.title, tag: ui`glasstodo:event:${event.id}` }));
+  const messages = recent.map(event => ({ title: t('GlassTodo 提醒'), body: event.title, tag: ui`glasstodo:event:${event.id}`, events: [event] }));
   if (missed.length) messages.push({ title: t('GlassTodo 错过的提醒'),
     body: missed.length === 1 ? missed[0].title : ui`${missed.length} 项错过的提醒：${missed.slice(0,3).map(event => event.title).join(t('、'))}${missed.length > 3 ? t('等') : ''}。请在提醒中心查看。`,
-    tag: ui`glasstodo:missed:${missed[0].id}:${missed[0].firedAt}` });
+    tag: ui`glasstodo:missed:${missed[0].id}:${missed[0].firedAt}`, events: missed });
   return messages;
 }
 
@@ -75,7 +75,7 @@ export function sendReminderNotifications(events, onClick, NotificationAPI = glo
   const messages = notificationMessages(events, now);
   let requested = 0;
   for (const message of messages) {
-    if (notifyDesktop(message.title, message.body, onClick, NotificationAPI, message.tag)) requested++;
+    if (notifyDesktop(message.title, message.body, () => onClick?.(message.events), NotificationAPI, message.tag)) requested++;
   }
   return { requested, total: messages.length };
 }

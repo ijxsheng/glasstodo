@@ -54,6 +54,7 @@ export function snoozeFields(task, minutes, now = new Date()) {
   return { snoozedUntil: new Date(now.getTime() + minutes * 60000).toISOString(), reminderFiredAt: null, reminderVersion: (task.reminderVersion || 1) + 1 };
 }
 export function notifyDesktop(title, body, onClick, NotificationAPI = globalThis.Notification, tag) {
+  try { if (globalThis.localStorage?.getItem('glasstodo.notifications.enabled') === 'false') return false; } catch { /* Use the browser permission when storage is unavailable. */ }
   if (!NotificationAPI || NotificationAPI.permission !== 'granted') return false;
   try {
     const notification = new NotificationAPI(title, { body, ...(tag ? {tag} : {}) });

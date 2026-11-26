@@ -1,6 +1,7 @@
 import { t, ui, language, locale, saveLanguage, taskCount } from './modules/i18n.js';
 import { installDateInputs } from './modules/date-input.js';
 import { setupPwa } from './modules/pwa.js';
+import { setupNotificationOnboarding } from './modules/notification-onboarding.js';
 document.documentElement.lang = locale;
 import './style.css';
 import { reminderPickerMarkup, syncReminderPicker, bindReminderPicker } from './modules/reminder-picker.js';
@@ -658,6 +659,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) chec
 setInterval(checkReminders, 30000);
 renderNotificationPermission();
 reloadTasks().then(checkReminders).catch(() => {});
+setupNotificationOnboarding(renderNotificationPermission);
 
 const subtaskForm = $('#subtask-form');
 function subtaskReminderSchedule() {

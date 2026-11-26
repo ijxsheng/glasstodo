@@ -67,7 +67,7 @@ export const translations = {
   '子任务列表格式无效。':'Invalid subtask list.','子任务名称':'Subtask name','子任务完成进度':'Subtask completion',
   '子任务将随主任务一起保存。':'This subtask will be saved with its parent task.','子任务已保存。':'Subtask saved.',
   '子任务已删除或不存在，请重新打开任务。':'The subtask was deleted or is unavailable. Reopen the task.',
-  '子任务已删除，可在任务详情中恢复。':'Subtask deleted. Restore it in task details.',
+  '子任务已删除。':'Subtask deleted.',
   '子任务已在其他窗口修改，请关闭表单后重新编辑。':'This subtask changed in another window. Close the form and edit it again.',
   '子任务已恢复。':'Subtask restored.','子任务开始日期':'Subtask start date','子任务开始时间':'Subtask start time',
   '子任务截止日期':'Subtask due date','子任务截止时间':'Subtask due time','子任务提醒日期':'Subtask reminder date',

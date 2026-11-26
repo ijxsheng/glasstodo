@@ -1,11 +1,11 @@
-import { t, ui, language, taskCount } from './i18n.js';
+import { t, ui } from './i18n.js';
 import { categories, createTask, validateFields, normalizeTask, statusFields, taskStatus, progressEntry } from './task.js';
 import { validateCategoryName, changeCategory } from './category.js';
 import { tagKey } from './tag.js';
 import { validateAttachments } from './attachment.js';
 import { changeProgress } from './progress.js';
 import { nextOccurrence } from './recurrence.js';
-import { planTaskReminders, reminderSubject, dailyDue, snoozeFields } from './notification.js';
+import { planTaskReminders, reminderSubject, snoozeFields } from './notification.js';
 import { changeSubtask, createInitialSubtasks } from './subtask.js';
 import { reminderSettingsChanged } from './reminder-options.js';
 
@@ -282,24 +282,14 @@ async function reminderTransaction(action) {
 }
 
 export function getReminders() {
-  return reminderTransaction(({ tasks, events, settings }) => ({ settings, events: events.filter(event => !event.dismissedAt && (event.kind === 'daily' || reminderSubject(tasks, event))).sort((a,b) => b.firedAt.localeCompare(a.firedAt)) }));
-}
-export function saveDailyReminder(enabled, time) {
-  if (typeof enabled !== 'boolean' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error(t('请选择有效的每日提醒时间。'));
-  return reminderTransaction(({ settings, settingStore }) => settingStore.put({ ...settings, enabled, time }));
+  return reminderTransaction(({ tasks, events, settings }) => ({ settings, events: events.filter(event => !event.dismissedAt && (event.kind === 'task' && reminderSubject(tasks, event))).sort((a,b) => b.firedAt.localeCompare(a.firedAt)) }));
 }
 export function claimReminders(now = new Date()) {
-  return reminderTransaction(({ tasks, settings, taskStore, eventStore, settingStore }) => {
+  return reminderTransaction(({ tasks, taskStore, eventStore }) => {
     const plan = planTaskReminders(tasks, now);
     const claimed = plan.events;
     plan.changed.forEach(task => taskStore.put(task));
     claimed.forEach(event => eventStore.put(event));
-    if (dailyDue(settings, tasks, now)) {
-      const date = ui`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const count = tasks.filter(task => !task.deletedAt && !['done','cancel'].includes(taskStatus(task)) && (task.timeMode === 'range' ? task.startDate <= date && task.dueDate >= date : task.dueDate === date)).length;
-      const event = { id: ui`daily@${date}`, kind: 'daily', title: language === 'zh' ? ui`今天还有 ${count} 项待办` : 'Today: ' + taskCount(count) + ' left', scheduledAt: new Date(ui`${date}T${settings.time}`).toISOString(), firedAt: now.toISOString(), dismissedAt: null };
-      eventStore.put(event); settingStore.put({ ...settings, lastDate: date }); claimed.push(event);
-    }
     return claimed;
   });
 }

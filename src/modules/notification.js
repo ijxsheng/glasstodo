@@ -1,5 +1,5 @@
 import { t, ui } from './i18n.js';
-import { isActive, localDate, scheduledOn } from './task.js';
+import { isActive } from './task.js';
 import { reminderFields } from './reminder-options.js';
 
 export function reminderStamp(task) {
@@ -43,10 +43,6 @@ export function planTaskReminders(tasks, now = new Date()) {
     if (next !== parent) { next.subtasks = subtasks; changed.push(next); }
   }
   return { changed, events };
-}
-export function dailyDue(settings, tasks, now = new Date()) {
-  const date = localDate(now);
-  return settings.enabled && settings.lastDate !== date && now >= new Date(ui`${date}T${settings.time || '09:00'}`) && tasks.some(task => !task.deletedAt && isActive(task) && scheduledOn(task, date));
 }
 export function snoozeFields(task, minutes, now = new Date()) {
   if (![5,10,30].includes(minutes)) throw new Error(t('请选择 5、10 或 30 分钟。'));

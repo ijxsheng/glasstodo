@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createTask, validateFields } from '../src/modules/task.js';
-import { reminderDue, dailyDue, snoozeFields, notifyDesktop } from '../src/modules/notification.js';
+import { reminderDue, snoozeFields, notifyDesktop } from '../src/modules/notification.js';
 
 const input = { title:'管理会计复习', category:'学习', priority:'none', dueDate:'2026-11-23', dueTime:'10:00', reminderEnabled:true, reminderDate:'2026-11-23', reminderTime:'09:00', repeat:'daily' };
 const now = new Date('2026-11-23T09:01:00');
@@ -30,15 +30,6 @@ test('延迟5/10/30分钟递增版本且清除触发标记', () => {
   }
   assert.throws(()=>snoozeFields(task,1,now));
   assert.throws(()=>snoozeFields({...task,status:'done'},5,now));
-});
-test('每日提醒只当天有活动任务且到时间时发送，发送日去重', () => {
-  const settings={enabled:true,time:'09:00',lastDate:''};
-  assert.equal(dailyDue(settings,[task],now),true);
-  assert.equal(dailyDue({...settings,lastDate:'2026-11-23'},[task],now),false);
-  assert.equal(dailyDue({...settings,enabled:false},[task],now),false);
-  assert.equal(dailyDue(settings,[{...task,status:'done'}],now),false);
-  assert.equal(dailyDue(settings,[task],new Date('2026-11-23T08:59:59')),false);
-  assert.equal(dailyDue(settings,[{...task,timeMode:'range',startDate:'2026-11-22',dueDate:'2026-11-24'}],now),true);
 });
 test('系统通知只在已授权时调用，不支持或构造失败时保留站内替代', () => {
   let sent=0;

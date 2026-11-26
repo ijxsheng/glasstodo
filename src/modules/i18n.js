@@ -110,7 +110,7 @@ export const translations = {
   '时间段':'Time range','时间段需要填写完整的开始和结束日期、时间。':'Enter both start and end dates and times.','时间类型':'Schedule',
   '暂无任务':'No tasks','暂无子任务。':'No subtasks yet.','暂无待处理提醒。':'No pending reminders.','暂无进展记录。':'No progress entries yet.',
   '最多 20 个字符。':'Up to 20 characters.','最近删除':'Recently deleted','未开启':'Off',
-  '未授权时仍保留网页内提醒。运行期间每 30 秒检查；完全关闭应用后无法保证准时提醒，重新打开会汇总错过的提醒；刚到时的提醒分别显示，无需间隔。每日有待办时最多提醒一次。':'In-app reminders work without notification permission. While the app runs, reminders are checked every 30 seconds. Closing the app prevents reliable delivery; missed reminders are collected when you reopen it. Due reminders are sent separately, with no required gap. Daily reminders are sent at most once on days with scheduled tasks.',
+  '未授权时仍保留网页内提醒。运行期间每 30 秒检查；完全关闭应用后无法保证准时提醒，重新打开会汇总错过的提醒；刚到时的提醒分别显示，无需间隔。每日有待办时最多提醒一次。':'In-app reminders work without notification permission. While the app runs, reminders are checked every 30 seconds. Closing the app prevents reliable delivery; missed reminders are collected when you reopen it. Due reminders are sent separately, with no required gap. ',
   '未来':'Upcoming','本地保存失败，请检查浏览器存储空间后重试。':'Could not save locally. Check browser storage and try again.',
   '本地数据':'Local data','本地数据已重新读取。':'Local data reloaded.','本地数据库尚未就绪':'Local database is not ready',
   '本地数据操作失败，请重试。':'Local data operation failed. Try again.','本次进展':'Progress update',

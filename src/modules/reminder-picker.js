@@ -20,7 +20,7 @@ export function syncReminderPicker(form, prefix, schedule) {
   }
   const anchor = reminderAnchor(schedule);
   for (const input of picker.querySelectorAll('input')) input.disabled = ['hour','day','week'].includes(input.value) && !anchor;
-  let preview = !anchor && mode === 'none' ? t('未设置完整时点时，可选择自定义提醒。') : '';
+  let preview = '';
   if (['hour','day','week'].includes(mode)) {
     try {
       const fields = reminderFields({...schedule,reminderMode:mode});

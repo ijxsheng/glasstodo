@@ -4,6 +4,7 @@ import { setupPwa } from './modules/pwa.js';
 import { setupNotificationOnboarding } from './modules/notification-onboarding.js';
 document.documentElement.lang = locale;
 import './style.css';
+import './glass.css';
 import { reminderPickerMarkup, syncReminderPicker, bindReminderPicker } from './modules/reminder-picker.js';
 import { reminderMode, reminderOptions } from './modules/reminder-options.js';
 import { changeSubtask, subtaskProgress } from './modules/subtask.js';

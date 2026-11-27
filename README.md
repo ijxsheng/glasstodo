@@ -2,6 +2,10 @@
 
 A bilingual, browser-based todo app with a glass-style interface and PWA installation.
 
+Live demo: https://ijxsheng.github.io/glasstodo/
+
+Read the [user guide / 使用说明](USER-GUIDE.md) for installation, reminders, data storage, updates and troubleshooting.
+
 ## Features
 
 Tasks and subtasks, categories and tags, five task statuses, optional deadlines and time ranges, progress notes, local attachments, and reminders while the app runs.
